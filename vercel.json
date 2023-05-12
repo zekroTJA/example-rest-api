@@ -27,5 +27,12 @@
         }
       ]
     }
+  ],
+
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://github.com/zekroTJA/example-rest-api"
+    }
   ]
 }
