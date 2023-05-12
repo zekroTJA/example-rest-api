@@ -1,6 +1,7 @@
 use example_rest_api::{
     controller::{errors::ErrorKind, Controller},
     expect, get_path_param, method_handlers,
+    utils::response::no_content,
 };
 use vercel_runtime::{
     http::{bad_request, internal_server_error, not_found, ok},
@@ -17,6 +18,7 @@ async fn handler(req: Request) -> Result<Response<Body>, Error> {
         "GET" => handler_get(req).await,
         "PUT" => handler_put(req).await,
         "DELETE" => handler_delete(req).await,
+        "OPTIONS" => no_content(),
     )
 }
 

@@ -1,4 +1,6 @@
-use example_rest_api::{controller::Controller, expect, method_handlers};
+use example_rest_api::{
+    controller::Controller, expect, method_handlers, utils::response::no_content,
+};
 use vercel_runtime::{
     http::{bad_request, internal_server_error},
     *,
@@ -12,6 +14,7 @@ async fn main() -> Result<(), Error> {
 async fn handler(req: Request) -> Result<Response<Body>, Error> {
     method_handlers!(req,
         "POST" => handler_post(req).await,
+        "OPTIONS" => no_content(),
     )
 }
 
