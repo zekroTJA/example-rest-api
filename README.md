@@ -216,3 +216,8 @@ Delete an object in a collection by ID.
 ```
 DELETE /api/collections/:collectionid/objects/:objectid
 ```
+
+---
+
+© 2023 Ringo Hoffmann.  
+Covered by the [MIT License](LICENSE).
