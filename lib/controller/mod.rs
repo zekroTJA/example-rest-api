@@ -1,7 +1,7 @@
 pub mod collections;
 pub mod errors;
 pub mod objects;
-pub(self) mod util;
+mod util;
 
 use crate::persistence::{redis::RedisClient, Persistence};
 use anyhow::Result;
