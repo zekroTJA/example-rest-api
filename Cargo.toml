@@ -18,6 +18,7 @@ redis = { version = "0.25.3", default-features = false, features = [
 ] }
 serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
+thiserror = "1.0.60"
 tokio = "1.28.1"
 url = "2.3.1"
 vercel_runtime = "1.1.1"

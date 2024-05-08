@@ -29,7 +29,7 @@ async fn handler_post(req: Request) -> Result<Response<Body>, Error> {
         Err(err) => internal_server_error(format!("failed creating collection: {err}")));
 
     Ok(Response::builder()
-        .status(StatusCode::OK)
+        .status(StatusCode::CREATED)
         .header("content-type", "application/json")
         .body(Body::Text(serde_json::to_string(&res).unwrap()))?)
 }

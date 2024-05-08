@@ -1,5 +1,5 @@
 use example_rest_api::{
-    controller::{errors::ErrorKind, Controller},
+    controller::{errors::Error as ControllerError, Controller},
     expect, get_path_param, method_handlers,
     utils::response::no_content,
 };
@@ -30,11 +30,8 @@ async fn handler_get(req: Request) -> Result<Response<Body>, Error> {
     let objectid = get_path_param!(&req, "objectid");
 
     let res = expect!(controller.get_object(&collectionid, &objectid).await,
-        Err(err) => match err.kind() {
-            ErrorKind::CollectionNotFound => not_found("collection not found"),
-            _ => internal_server_error(format!("failed getting object: {err}"))
-        }
-    );
+        Err(ControllerError::CollectionNotFound) => not_found("collection not found"),
+        Err(err) => internal_server_error(format!("failed getting object: {err}")));
 
     match res {
         None => not_found("object not found"),
@@ -53,12 +50,9 @@ async fn handler_put(req: Request) -> Result<Response<Body>, Error> {
         Err(err) => bad_request(format!("failed decoding request body: {err}")));
 
     let res = expect!(controller.set_object(&collectionid, &objectid, req).await,
-        Err(err) => match err.kind() {
-            ErrorKind::CollectionNotFound => not_found("collection not found"),
-            ErrorKind::ObjectNotFound => not_found("object not found"),
-            _ => internal_server_error(format!("failed getting object: {err}"))
-        }
-    );
+        Err(ControllerError::CollectionNotFound) => not_found("collection not found"),
+        Err(ControllerError::ObjectNotFound) => not_found("object not found"),
+        Err(err) => internal_server_error(format!("failed getting object: {err}")));
 
     ok(res)
 }
@@ -71,11 +65,8 @@ async fn handler_delete(req: Request) -> Result<Response<Body>, Error> {
     let objectid = get_path_param!(&req, "objectid");
 
     expect!(controller.delete_object(&collectionid, &objectid).await,
-        Err(err) => match err.kind() {
-            ErrorKind::CollectionNotFound => not_found("collection not found"),
-            _ => internal_server_error(format!("failed getting object: {err}"))
-        }
-    );
+        Err(ControllerError::CollectionNotFound) => not_found("collection not found"),
+        Err(err) => internal_server_error(format!("failed getting object: {err}")));
 
     Ok(Response::builder()
         .status(StatusCode::NO_CONTENT)

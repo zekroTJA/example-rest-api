@@ -23,12 +23,17 @@ macro_rules! expect {
         }
     };
 
-    ($expression:expr, $pattern:pat_param => $bail:expr) => {
+    ($expression:expr, $pattern:pat_param => $bail:expr $(,$extra_pattern:pat_param => $extra_bail:expr)*) => {
         match $expression {
             Ok(v) => v,
             $pattern => {
                 return $bail;
             }
+            $(
+                $extra_pattern => {
+                    return $extra_bail;
+                }
+            )*
         }
     };
 }

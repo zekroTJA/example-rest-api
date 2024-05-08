@@ -40,3 +40,26 @@ pub enum Entry {
     Vec(Vec<Entry>),
     Bool(bool),
 }
+
+pub trait Update {
+    type With;
+
+    fn update(&mut self, with: Self::With);
+}
+
+impl Update for Collection {
+    type With = CollectionRequest;
+
+    fn update(&mut self, with: Self::With) {
+        self.name = with.name;
+    }
+}
+
+impl Update for Object {
+    type With = ObjectRequest;
+
+    fn update(&mut self, with: Self::With) {
+        self.name = with.name;
+        self.data = with.data;
+    }
+}

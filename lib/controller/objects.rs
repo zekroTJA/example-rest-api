@@ -1,9 +1,10 @@
-use super::errors::ErrorKind;
+use super::errors::Error;
 use super::errors::Result;
 use super::util::build_key;
 use super::util::GROUP_COLLECTIONS;
 use super::util::GROUP_OBJECTS;
 use super::Controller;
+use crate::models::Update;
 use crate::models::{Object, ObjectRequest};
 use chrono::Local;
 
@@ -35,19 +36,15 @@ impl Controller {
         &self,
         collection: &str,
         id: &str,
-        object: ObjectRequest,
+        new_object: <Object as Update>::With,
     ) -> Result<Object> {
-        let Some(current) = self.get_object(collection, id).await? else {
-            return Err(ErrorKind::ObjectNotFound.into());
+        let Some(mut object) = self.get_object(collection, id).await? else {
+            return Err(Error::ObjectNotFound);
         };
 
-        let new = Object {
-            name: object.name,
-            data: object.data,
-            ..current
-        };
+        object.update(new_object);
 
-        let serialized = serde_json::to_vec(&new)?;
+        let serialized = serde_json::to_vec(&object)?;
 
         self.persistence
             .set(
@@ -57,7 +54,7 @@ impl Controller {
             )
             .await?;
 
-        Ok(new)
+        Ok(object)
     }
 
     pub async fn get_object(&self, collection: &str, id: &str) -> Result<Option<Object>> {
@@ -108,7 +105,7 @@ impl Controller {
         if collection_exists {
             Ok(())
         } else {
-            Err(ErrorKind::CollectionNotFound.into())
+            Err(Error::CollectionNotFound)
         }
     }
 }

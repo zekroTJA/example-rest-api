@@ -1,5 +1,5 @@
 use example_rest_api::{
-    controller::{errors::ErrorKind, Controller},
+    controller::{errors::Error as ControllerError, Controller},
     expect, get_path_param, method_handlers,
     utils::response::no_content,
 };
@@ -28,11 +28,8 @@ async fn handler_get(req: Request) -> Result<Response<Body>, Error> {
     let collectionid = get_path_param!(&req, "collectionid");
 
     let res = expect!(controller.list_objects(&collectionid).await,
-        Err(err) => match err.kind() {
-            ErrorKind::CollectionNotFound => not_found("collection not found"),
-            _ => internal_server_error(format!("failed listing objects: {err}"))
-        }
-    );
+        Err(ControllerError::CollectionNotFound) => not_found("collection not found"),
+        Err(err) => internal_server_error(format!("failed listing objects: {err}")));
 
     ok(res)
 }
@@ -47,11 +44,8 @@ async fn handler_post(req: Request) -> Result<Response<Body>, Error> {
         Err(err) => bad_request(format!("failed decoding request body: {err}")));
 
     let res = expect!(controller.create_object(&collectionid, req).await,
-        Err(err) => match err.kind() {
-            ErrorKind::CollectionNotFound => not_found("collection not found"),
-            _ => internal_server_error(format!("failed creating object: {err}"))
-        }
-    );
+        Err(ControllerError::CollectionNotFound) => not_found("collection not found"),
+        Err(err) => internal_server_error(format!("failed creating object: {err}")));
 
     Ok(Response::builder()
         .status(StatusCode::CREATED)
