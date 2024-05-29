@@ -1,0 +1,215 @@
+### Defaults
+
+[Header]
+Content-Type: application/json
+
+
+
+### Teardown
+
+// Clean up object 1.
+
+DELETE {{.instance}}/api/collections/{{.collection.id}}/objects/{{.object1.id}}
+
+[Options]
+condition = {{ isset . "object1" }}
+
+[Script]
+assert(response.StatusCode == 204, `invalid status code: ${response.StatusCode}`);
+
+---
+
+// Clean up object 2.
+
+DELETE {{.instance}}/api/collections/{{.collection.id}}/objects/{{.object2.id}}
+
+[Options]
+condition = {{ isset . "object2" }}
+
+[Script]
+assert(response.StatusCode == 204, `invalid status code: ${response.StatusCode}`);
+
+---
+
+// Clean up collection.
+
+DELETE {{.instance}}/api/collections/{{.collection.id}}
+
+[Options]
+condition = {{ isset . "collection" }}
+
+[Script]
+assert(response.StatusCode == 204, `invalid status code: ${response.StatusCode}`);
+
+---
+
+### Tests
+
+// Create a collection.
+
+POST {{.instance}}/api/collections
+
+[Body]
+{
+    "name": "my games"
+}
+
+[Script]
+debug(response);
+assert(response.StatusCode == 201, `invalid status code: ${response.StatusCode}`);
+var collection = response.Body;
+assert(collection.name === "my games", "Invalid collection name");
+
+---
+
+// Get created collection.
+
+GET {{.instance}}/api/collections/{{.collection.id}}
+
+[Script]
+debug(response);
+assert(response.StatusCode == 200, `invalid status code: ${response.StatusCode}`);
+assert(response.Body.id === collection.id, "Invalid id");
+assert(response.Body.created_at === collection.created_at, "Invalid created_at");
+assert(response.Body.name === collection.name, "Invalid name");
+
+---
+
+// Update the collection.
+
+PUT {{.instance}}/api/collections/{{.collection.id}}
+
+[PreScript]
+var newCollection = {
+    ...collection,
+    name: "My Games"
+}
+
+[Body]
+{{json .newCollection}}
+
+[Script]
+debug(response);
+assert(response.StatusCode == 200, `invalid status code: ${response.StatusCode}`);
+collection = newCollection;
+
+---
+
+// Get created collection.
+
+GET {{.instance}}/api/collections/{{.collection.id}}
+
+[Script]
+debug(response);
+assert(response.StatusCode == 200, `invalid status code: ${response.StatusCode}`);
+assert(response.Body.id === collection.id, "Invalid id");
+assert(response.Body.created_at === collection.created_at, "Invalid created_at");
+assert(response.Body.name === collection.name, "Invalid name");
+
+---
+
+// Create object in collection
+
+POST {{.instance}}/api/collections/{{.collection.id}}/objects
+
+[Body]
+{
+    "name": "Cyberpunk 2077",
+    "data": {
+        "publisher": "CD PROJECT RED",
+        "developer": "CD PROJECT RED",
+        "released": "2020-12-10T00:00:00Z",
+        "tags": ["Cyberpunk", "Open World"],
+        "age_rating": "18"
+    }
+}
+
+[Script]
+assert(response.StatusCode == 201, `invalid status code: ${response.StatusCode}`);
+var object1 = response.Body;
+
+---
+
+// Create another object in collection
+
+POST {{.instance}}/api/collections/{{.collection.id}}/objects
+
+[Body]
+{
+    "name": "Cult of the Lamb",
+    "data": {
+        "publisher": "Devolver Digital",
+        "developer": "Massive Monster",
+        "released": "2022-08-11T00:00:00Z",
+        "tags": ["Action", "Adventure", "Indie", "Strategy"],
+        "age_rating": "12"
+    }
+}
+
+[Script]
+assert(response.StatusCode == 201, `invalid status code: ${response.StatusCode}`);
+var object2 = response.Body;
+
+---
+
+// Get first object
+
+GET {{.instance}}/api/collections/{{.collection.id}}/objects/{{.object1.id}}
+
+[Script]
+assert(response.StatusCode == 200, `invalid status code: ${response.StatusCode}`);
+assert(response.Body.id === object1.id, "invalid id");
+assert(response.Body.created_at === object1.created_at, "invalid created_at");
+assert(response.Body.name === object1.name, "invalid name");
+assert(response.Body.data.publisher === object1.data.publisher, "invalid data.publisher");
+assert(response.Body.data.released === object1.data.released, "invalid data.released");
+
+---
+
+// Get second object
+
+GET {{.instance}}/api/collections/{{.collection.id}}/objects/{{.object2.id}}
+
+[Script]
+assert(response.StatusCode == 200, `invalid status code: ${response.StatusCode}`);
+assert(response.Body.id === object2.id, "invalid id");
+assert(response.Body.created_at === object2.created_at, "invalid created_at");
+assert(response.Body.name === object2.name, "invalid name");
+assert(response.Body.data.publisher === object2.data.publisher, "invalid data.publisher");
+assert(response.Body.data.released === object2.data.released, "invalid data.released");
+
+---
+
+// Update first object in collection
+
+PUT {{.instance}}/api/collections/{{.collection.id}}/objects/{{.object1.id}}
+
+[PreScript]
+var newObject1 = {
+    ...object1,
+    data: {
+        ...object1.data,
+        tags: [...object1.data.tags, "RPG", "Sci-fi"]
+    }
+};
+
+[Body]
+{{json .newObject1}}
+
+[Script]
+assert(response.StatusCode == 200, `invalid status code: ${response.StatusCode}`);
+
+---
+
+// Get updated first object
+
+GET {{.instance}}/api/collections/{{.collection.id}}/objects/{{.object1.id}}
+
+[Script]
+assert(response.StatusCode == 200, `invalid status code: ${response.StatusCode}`);
+assert(response.Body.id === object1.id, "invalid id");
+assert(response.Body.created_at === object1.created_at, "invalid created_at");
+assert(response.Body.name === object1.name, "invalid name");
+assert(response.Body.data.publisher === object1.data.publisher, "invalid data.publisher");
+assert(response.Body.data.released === object1.data.released, "invalid data.released");
+assert(JSON.stringify(response.Body.data.tags) === JSON.stringify(newObject1.data.tags), "invalid updated data.tags");
