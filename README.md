@@ -111,6 +111,42 @@ CollectionResponse
 }
 ```
 
+#### Update Collection
+
+Update a collection.
+
+```
+POST /api/collections/:collectionid
+```
+
+##### Request Payload
+
+```ts
+CollectionRequest
+```
+
+*Example:*
+```json
+{
+    "name": "My Games"
+}
+```
+
+##### Response Payload
+
+```ts
+CollectionResponse
+```
+
+*Example:*
+```json
+{
+	"id": "chf13ur2iejc717547r0",
+	"created_at": "2023-05-12T10:16:27.319442753+00:00",
+	"name": "My Games"
+}
+```
+
 #### Delete Collection
 
 Delete a collection by ID.
@@ -206,6 +242,34 @@ ObjectResponse
 		"developer": "CD PROJECT RED",
 		"released": "2020-12-10T00:00:00Z"
 	}
+}
+```
+
+#### Update Object
+
+Update an object in a collection.
+
+```
+POST /api/collections/:collectionid/objects/:objectid
+```
+
+##### Request Payload
+
+```ts
+ObjectRequest
+```
+
+*Example:*
+```json
+{
+    "name": "Cyberpunk 2077",
+    "data": {
+        "publisher": "CD PROJECT RED",
+        "developer": "CD PROJECT RED",
+        "released": "2020-12-10T00:00:00Z",
+        "tags": ["Cyberpunk", "Open World", "RPG", "Sci-fi", "Explicit"],
+        "age_rating": "18"
+    }
 }
 ```
 
